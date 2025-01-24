@@ -36,7 +36,7 @@
     "next.config.js",
     "tailwind.config.js",
     "out/types/**/*.ts"
-  ],
+, "src/app/character/page.jsx", "src/app/golden-meadows/page.jsx", "src/app/interior/page.jsx", "src/app/page.jsx"  ],
   "exclude": [
     "node_modules"
   ]

@@ -10,7 +10,7 @@ function Model() {
   return (
     <primitive
       object={scene}
-      scale={1}
+      scale={[1, 1, 1]}
       position={[0, -1, 0]}
       rotation={[0, Math.PI, 0]}
     />
@@ -64,8 +64,9 @@ export default function Character() {
                 Character Model Showcase
               </h2>
               <p className="text-lg text-gray-600 mb-6">
-                Explore our detailed character model with lifelike features and expressions.
-                This showcase demonstrates our capabilities in character modeling and animation.
+                Explore our detailed character model with lifelike features and
+                expressions. This showcase demonstrates our capabilities in
+                character modeling and animation.
               </p>
             </div>
           </div>
@@ -73,4 +74,4 @@ export default function Character() {
       </main>
     </div>
   );
-} 
+}
