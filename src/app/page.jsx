@@ -7,7 +7,7 @@ import Link from "next/link";
 
 // Create preview components for each model
 function HousePreview() {
-  const { scene } = useGLTF("/models/house/result.gltf");
+  const { scene } = useGLTF("/three-js-project/models/house/result.gltf");
   return (
     <primitive
       object={scene}
@@ -19,7 +19,7 @@ function HousePreview() {
 }
 
 function OldManPreview() {
-  const { scene } = useGLTF("/models/old-man/result.gltf");
+  const { scene } = useGLTF("/three-js-project/models/old-man/result.gltf");
   return (
     <primitive
       object={scene}
@@ -31,7 +31,7 @@ function OldManPreview() {
 }
 
 function RoomPreview() {
-  const { scene } = useGLTF("/models/room/result.gltf");
+  const { scene } = useGLTF("/three-js-project/models/room/result.gltf");
   return (
     <primitive
       object={scene}
@@ -43,9 +43,9 @@ function RoomPreview() {
 }
 
 // Preload all models
-useGLTF.preload("/models/house/result.gltf");
-useGLTF.preload("/models/old-man/result.gltf");
-useGLTF.preload("/models/room/result.gltf");
+useGLTF.preload("/three-js-project/models/house/result.gltf");
+useGLTF.preload("/three-js-project/models/old-man/result.gltf");
+useGLTF.preload("/three-js-project/models/room/result.gltf");
 
 export default function Home() {
   return (

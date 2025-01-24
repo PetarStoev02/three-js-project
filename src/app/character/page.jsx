@@ -5,19 +5,23 @@ import { OrbitControls, useGLTF, Environment, Stage } from "@react-three/drei";
 import { Suspense } from "react";
 import Link from "next/link";
 
+
 function Model() {
-  const { scene } = useGLTF("/models/old-man/result.gltf");
+  const { scene } = useGLTF("/three-js-project/models/old-man/result.gltf")
   return (
     <primitive
       object={scene}
       scale={[1, 1, 1]}
       position={[0, -1, 0]}
-      rotation={[0, Math.PI, 0]}
+      rotation={[0, Math.PI, 0] }
     />
   );
 }
 
-useGLTF.preload("/models/old-man/result.gltf");
+// Update the preload path as well
+useGLTF.preload("/three-js-project/models/old-man/result.gltf");
+
+// ... existing code ...
 
 export default function Character() {
   return (

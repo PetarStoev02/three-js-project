@@ -6,7 +6,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 
 function Model() {
-  const { scene } = useGLTF("/models/room/result.gltf");
+  const { scene } = useGLTF("/three-js-project/models/room/result.gltf");
   return (
     <primitive
       object={scene}
@@ -17,7 +17,7 @@ function Model() {
   );
 }
 
-useGLTF.preload("/models/room/result.gltf");
+useGLTF.preload("/three-js-project/models/room/result.gltf");
 
 export default function Interior() {
   return (

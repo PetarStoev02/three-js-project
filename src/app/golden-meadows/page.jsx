@@ -6,7 +6,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 
 function Model() {
-  const { scene } = useGLTF("/models/house/result.gltf");
+  const { scene } = useGLTF("/three-js-project/models/house/result.gltf");
   return (
     <primitive
       object={scene}
@@ -17,7 +17,7 @@ function Model() {
   );
 }
 
-useGLTF.preload("/models/house/result.gltf");
+useGLTF.preload("/three-js-project/models/house/result.gltf");
 
 export default function GoldenMeadows() {
   return (
