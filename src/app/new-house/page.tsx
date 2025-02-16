@@ -8,12 +8,7 @@ import Link from "next/link";
 function Model() {
   const { scene } = useGLTF("/three-js-project/models/newHouse/result.gltf");
   return (
-    <primitive
-      object={scene}
-      scale={1}
-      position={[0, -1, 0]}
-      rotation={[0, Math.PI, 0]}
-    />
+  true
   );
 }
 
