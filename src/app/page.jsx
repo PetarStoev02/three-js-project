@@ -42,10 +42,24 @@ function RoomPreview() {
   );
 }
 
+// Add this new preview component after other preview components
+function NewHousePreview() {
+  const { scene } = useGLTF("/three-js-project/models/newHouse/result.gltf");
+  return (
+    <primitive
+      object={scene}
+      scale={1}
+      position={[0, -1, 0]}
+      rotation={[0, Math.PI, 0]}
+    />
+  );
+}
+
 // Preload all models
 useGLTF.preload("/three-js-project/models/house/result.gltf");
 useGLTF.preload("/three-js-project/models/old-man/result.gltf");
 useGLTF.preload("/three-js-project/models/room/result.gltf");
+useGLTF.preload("/three-js-project/models/newHouse/result.gltf");
 
 export default function Home() {
   return (
@@ -164,6 +178,42 @@ export default function Home() {
                   Take a tour of our modern interior design concepts.
                 </p>
                 <span className="text-green-500 text-xs sm:text-sm tracking-wider group-hover:text-green-400 transition-colors">
+                  EXPLORE PROJECT →
+                </span>
+              </div>
+            </div>
+          </Link>
+
+          {/* Add this new card before the closing div */}
+          <Link href="/new-house" className="group">
+            <div className="bg-neutral-900 rounded-2xl overflow-hidden shadow-2xl transform transition-all duration-500 hover:scale-[1.02] hover:shadow-purple-500/20">
+              <div className="h-[300px] sm:h-[400px] relative">
+                <Canvas
+                  camera={{
+                    position: [5, 3, 5],
+                    fov: 45,
+                  }}
+                >
+                  <Suspense fallback={null}>
+                    <Stage environment="sunset" intensity={0.6}>
+                      <NewHousePreview />
+                    </Stage>
+                    <OrbitControls
+                      enableZoom={false}
+                      autoRotate={true}
+                      autoRotateSpeed={1}
+                    />
+                  </Suspense>
+                </Canvas>
+              </div>
+              <div className="p-6 sm:p-8">
+                <h2 className="text-xl sm:text-2xl font-light text-white mb-2 sm:mb-3">
+                  Modern House
+                </h2>
+                <p className="text-sm sm:text-base text-neutral-400 mb-4 font-light">
+                  Experience our latest modern house design with contemporary features.
+                </p>
+                <span className="text-purple-500 text-xs sm:text-sm tracking-wider group-hover:text-purple-400 transition-colors">
                   EXPLORE PROJECT →
                 </span>
               </div>
