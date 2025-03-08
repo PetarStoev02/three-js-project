@@ -566,6 +566,9 @@ function CameraController() {
   const spiralRef = useRef(0);
   const isFirstScroll = useRef(true);
   const isDragging = useRef(false);
+  const touchStartY = useRef(0);
+  const touchStartX = useRef(0);
+  const isTouching = useRef(false);
   
   useFrame(({ camera }) => {
     if (!cameraRef.current) {
@@ -576,21 +579,28 @@ function CameraController() {
   useEffect(() => {
     const handleScroll = (e) => {
       if (controlsRef.current && cameraRef.current) {
-        e.preventDefault();
+        // Only prevent default for wheel events within the canvas
+        if (e.type === 'wheel') {
+          e.preventDefault();
+        }
         
         let scrollAmount = 0;
         if (e.type === 'wheel') {
           if (isFirstScroll.current) {
-            scrollAmount = e.deltaY * 0.05;
+            // Reverse the direction: negative deltaY (scroll up) should zoom in
+            scrollAmount = -e.deltaY * 0.05;
             isFirstScroll.current = false;
           } else {
-            scrollAmount = e.deltaY * 0.2;
+            // Reverse the direction: negative deltaY (scroll up) should zoom in
+            scrollAmount = -e.deltaY * 0.2;
           }
         } else if (e.type === 'keydown') {
-          if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') scrollAmount = -50;
-          if (e.key === 'ArrowDown' || e.key === 'ArrowRight') scrollAmount = 50;
+          // Reverse arrow keys for consistency
+          if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') scrollAmount = 50; // Zoom in
+          if (e.key === 'ArrowDown' || e.key === 'ArrowRight') scrollAmount = -50; // Zoom out
         } else if (e.type === 'mousemove' && isDragging.current) {
-          scrollAmount = e.movementY * 2;
+          // Reverse mouse drag direction for consistency
+          scrollAmount = -e.movementY * 2;
         }
 
         // Spiral effect
@@ -605,16 +615,8 @@ function CameraController() {
         const maxDistance = 160;  // Maximum zoom distance
         
         const currentDistance = cameraRef.current.position.length();
-        const newDistance = currentDistance + scrollAmount * zoomSpeed;
+        const newDistance = currentDistance - scrollAmount * zoomSpeed; // Reverse the direction
         const clampedDistance = Math.max(minDistance, Math.min(maxDistance, newDistance));
-        
-        // Log zoom values
-        console.log({
-          currentDistance,
-          newDistance,
-          clampedDistance,
-          zoomChange: newDistance - currentDistance
-        });
         
         // Height adjustment
         const heightOffset = spiralRef.current * 0.1;
@@ -624,6 +626,75 @@ function CameraController() {
         
         cameraRef.current.position.copy(normalizedPosition);
       }
+    };
+
+    // Touch event handlers for mobile
+    const handleTouchStart = (e) => {
+      // Only handle touch events if they're on the canvas element
+      const canvasElement = document.querySelector('canvas');
+      if (!canvasElement) return;
+      
+      const rect = canvasElement.getBoundingClientRect();
+      const touch = e.touches[0];
+      
+      // Check if the touch is within the canvas
+      if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
+          touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+        
+        e.preventDefault(); // Only prevent default if touching the canvas
+        isTouching.current = true;
+        touchStartY.current = touch.clientY;
+        touchStartX.current = touch.clientX;
+      }
+    };
+
+    const handleTouchMove = (e) => {
+      // Only process if we started the touch on the canvas
+      if (!isTouching.current) return;
+      
+      if (e.touches.length === 1 && controlsRef.current && cameraRef.current) {
+        e.preventDefault(); // Prevent scrolling while manipulating the 3D scene
+        
+        const touch = e.touches[0];
+        const touchY = touch.clientY;
+        const touchX = touch.clientX;
+        
+        // Calculate both X and Y movement for better control
+        const deltaY = touchStartY.current - touchY;
+        const deltaX = touchStartX.current - touchX;
+        
+        touchStartY.current = touchY;
+        touchStartX.current = touchX;
+        
+        // Reverse the direction: swipe up (negative deltaY) should zoom in
+        // Use a combination of X and Y movement for a more natural feel
+        const scrollAmount = -(deltaY * 1.5 + deltaX * 0.5);
+        
+        // Apply the same camera transformations as in handleScroll
+        spiralRef.current += Math.abs(scrollAmount) * 0.00001;
+        const rotationSpeed = 0.005 * (1 + spiralRef.current * 0.05);
+        rotationRef.current += scrollAmount * rotationSpeed;
+        controlsRef.current.setAzimuthalAngle(rotationRef.current);
+        
+        const zoomSpeed = 0.02;
+        const minDistance = 40;
+        const maxDistance = 160;
+        
+        const currentDistance = cameraRef.current.position.length();
+        const newDistance = currentDistance - scrollAmount * zoomSpeed; // Reverse the direction
+        const clampedDistance = Math.max(minDistance, Math.min(maxDistance, newDistance));
+        
+        const heightOffset = spiralRef.current * 0.1;
+        const normalizedPosition = cameraRef.current.position.normalize();
+        normalizedPosition.y += heightOffset * 0.02;
+        normalizedPosition.normalize().multiplyScalar(clampedDistance);
+        
+        cameraRef.current.position.copy(normalizedPosition);
+      }
+    };
+    
+    const handleTouchEnd = () => {
+      isTouching.current = false;
     };
 
     // Middle mouse button (wheel click) handlers
@@ -640,22 +711,41 @@ function CameraController() {
       }
     };
 
-    window.addEventListener('wheel', handleScroll, { passive: false });
+    // Get the canvas element to attach events specifically to it
+    const canvasElement = document.querySelector('canvas');
+    if (canvasElement) {
+      canvasElement.addEventListener('wheel', handleScroll, { passive: false });
+      canvasElement.addEventListener('touchstart', handleTouchStart, { passive: false });
+      canvasElement.addEventListener('touchmove', handleTouchMove, { passive: false });
+      canvasElement.addEventListener('touchend', handleTouchEnd);
+      canvasElement.addEventListener('mousedown', handleMouseDown);
+    }
+    
+    // These events can remain on window
     window.addEventListener('keydown', (e) => {
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
         e.preventDefault();
         handleScroll(e);
       }
     });
-    window.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mouseup', handleMouseUp);
     window.addEventListener('mousemove', handleScroll);
     window.addEventListener('mouseleave', () => { isDragging.current = false; });
 
     return () => {
-      window.removeEventListener('wheel', handleScroll);
-      window.removeEventListener('keydown', handleScroll);
-      window.removeEventListener('mousedown', handleMouseDown);
+      if (canvasElement) {
+        canvasElement.removeEventListener('wheel', handleScroll);
+        canvasElement.removeEventListener('touchstart', handleTouchStart);
+        canvasElement.removeEventListener('touchmove', handleTouchMove);
+        canvasElement.removeEventListener('touchend', handleTouchEnd);
+        canvasElement.removeEventListener('mousedown', handleMouseDown);
+      }
+      
+      window.removeEventListener('keydown', (e) => {
+        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+          handleScroll(e);
+        }
+      });
       window.removeEventListener('mouseup', handleMouseUp);
       window.removeEventListener('mousemove', handleScroll);
       window.removeEventListener('mouseleave', () => { isDragging.current = false; });
@@ -675,10 +765,31 @@ function CameraController() {
 }
 
 export default function newHouse() {
-  const [showLightHelpers, setShowLightHelpers] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showLightHelpers, setShowLightHelpers] = useState(false); // Default to false
   const [lightInfo, setLightInfo] = useState([]);
-  const [showControls, setShowControls] = useState(true); // Show controls by default
+  const [showControls, setShowControls] = useState(false); // Default to false
   const [updateLight, setUpdateLight] = useState(null);
+  
+  // Detect mobile device on component mount
+  useEffect(() => {
+    const checkMobile = () => {
+      const isMobileDevice = window.innerWidth <= 768;
+      setIsMobile(isMobileDevice);
+      
+      // Set initial state based on device type
+      setShowLightHelpers(!isMobileDevice);
+      setShowControls(!isMobileDevice);
+    };
+    
+    // Check on initial load
+    checkMobile();
+    
+    // Add resize listener to update when orientation changes
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   
   // Toggle light helpers with 'L' key and controls with 'C' key
   useEffect(() => {
@@ -744,7 +855,7 @@ export default function newHouse() {
         </div>
       </nav>
 
-      <main className="w-full h-screen">
+      <main className="w-full h-screen pt-20">
         <section className="relative h-screen">
           <div className="absolute inset-0 z-10">
             <Suspense fallback={<LoadingScreen />}>
@@ -762,8 +873,10 @@ export default function newHouse() {
                   toneMapping: THREE.ACESFilmicToneMapping,
                   toneMappingExposure: 1.0
                 }}
-                // Set a non-reflective background
-                style={{ background: 'linear-gradient(to bottom, #e0e0e0, #f8f8f8)' }}
+                style={{ 
+                  background: 'linear-gradient(to bottom, #e0e0e0, #f8f8f8)',
+                  touchAction: 'none' // Prevent browser handling of touch events on canvas
+                }}
               >
                 <Scene 
                   showLightHelpers={showLightHelpers} 
