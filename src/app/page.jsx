@@ -44,7 +44,7 @@ function RoomPreview() {
 
 // Add this new preview component after other preview components
 function NewHousePreview() {
-  const { scene } = useGLTF("/three-js-project/models/newHouse/result.gltf");
+  const { scene } = useGLTF("/three-js-project/models/newHouse/test2.gltf");
   return (
     <primitive
       object={scene}
@@ -59,7 +59,7 @@ function NewHousePreview() {
 useGLTF.preload("/three-js-project/models/house/result.gltf");
 useGLTF.preload("/three-js-project/models/old-man/result.gltf");
 useGLTF.preload("/three-js-project/models/room/result.gltf");
-useGLTF.preload("/three-js-project/models/newHouse/result.gltf");
+useGLTF.preload("/three-js-project/models/newHouse/test2.gltf");
 
 export default function Home() {
   return (
