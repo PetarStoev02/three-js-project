@@ -6,13 +6,13 @@ import { Suspense } from "react";
 import Link from "next/link";
 
 function Model() {
-  const { scene } = useGLTF("/three-js-project/models/test3/test3.gltf");
+  const { scene } = useGLTF("/three-js-project/models/test3/test2.gltf");
   return (
   true
   );
 }
 
-useGLTF.preload("/three-js-project/models/test3/test3.gltf");
+useGLTF.preload("/three-js-project/models/test3/test2.gltf");
 
 export default function newHouse() {
   return (
